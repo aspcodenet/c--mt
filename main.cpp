@@ -77,15 +77,33 @@ private:
 };
 
 
-void doingWork(std::string prefix){
+int doingWork(std::string prefix){
     for(int i = 0; i < 100; i++){
         std::cout << prefix <<  i << ":";
         std::this_thread::sleep_for(100ms);
     }
+    return 42;
 }
 
+
+void fetchJsonFromKlarna(){
+    for(int i = 0; i < 5; i++){
+        std::cout << "Fetching" << std::endl;
+        std::this_thread::sleep_for(5ms);
+    }
+}
+
+// so you can define a number of thereads and then have them execute different functions in the program?
+//Using a thread-pool is a common design pattern, to avoid 
+// thread setup/tear-down. Just keeping threads around is usually much more efficient.
 int main(int, char**){
-    ThreadPool pool { 8 };
+
+    int  threads = (int)std::thread::hardware_concurrency;
+    ThreadPool pool ( threads );
+
+    pool.add_task([]{
+        fetchJsonFromKlarna();
+    });
     for(int i = 0; i < 10; i++){
             pool.add_task([i] {
             doingWork(std::to_string(i) + "-");
@@ -111,7 +129,6 @@ int main(int, char**){
     // }
 
     // int x=12;
-    // std::this_thread::sleep_for(100ms);
     // x++; 
     // std::this_thread::sleep_for(100ms);
     // x++;
